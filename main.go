@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	m := block.NewManager()
-	oh := &api.ObjectsHandler{Storage: m}
+	bh := &api.BlocksHandler{Storage: m}
 	ph := &api.PeerHandler{Storage: m}
 
 	g := group.Group{Storage: m, Peers: make(map[int]*group.Peer)}
@@ -27,7 +27,7 @@ func main() {
 
 	go g.Sync()
 
-	http.Handle("/objects/", oh)
+	http.Handle("/blocks/", bh)
 	http.Handle("/peer/", ph)
 
 	http.ListenAndServe(fmt.Sprintf("127.0.0.1:808%d", *id), nil)
