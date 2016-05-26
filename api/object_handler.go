@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -30,7 +29,6 @@ func (oh *ObjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		log.Printf("got an object [id: %d, size: %d]", id, len(b.Blob))
 		w.Write(b.Blob)
 
 	case "POST":
@@ -48,6 +46,5 @@ func (oh *ObjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(fmt.Sprint(id)))
-		log.Printf("created an object [id: %d, size: %d]", id, len(blob))
 	}
 }

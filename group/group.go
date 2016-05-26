@@ -14,9 +14,11 @@ type Group struct {
 }
 
 func (g *Group) Sync() {
+	syncInterval := 10 * time.Second
+	log.Printf("start to sync with peers every %v", syncInterval)
 	for {
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(syncInterval):
 		}
 		g.syncWithPeers()
 	}
@@ -38,6 +40,7 @@ func (g *Group) syncWithPeers() {
 			if err != nil {
 				anyerr = err
 			}
+			log.Printf("got missing block %d from peer %s", id, p.URL)
 		}
 		if anyerr == nil && rbs.Until > p.progress {
 			p.progress = rbs.Until
@@ -51,7 +54,6 @@ func (g *Group) askBlock(p *Peer, id int) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("got missing block %d from peer %s", id, p.URL)
 	err = g.Storage.Append(&block.Block{ID: id, Blob: b})
 	if err != nil {
 		// internal issue...

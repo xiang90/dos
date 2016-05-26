@@ -47,7 +47,6 @@ func (ph *PeerHandler) serveBlock(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	log.Printf("got an block [id: %d, size: %d]", id, len(b.Blob))
 	w.Write(b.Blob)
 }
 
