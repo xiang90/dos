@@ -17,17 +17,21 @@ type Object struct {
 	metablock *block.Block
 }
 
+func NewObjectFromBlock(b *block.Block) *Object {
+	return &Object{
+		Reader:    newBlockr(b),
+		metablock: b,
+	}
+}
+
 func (o *Object) NextBlock() (*block.Block, error) {
-	buf := make([]byte, block.MaxSize)
+	buf := make([]byte, maxBlobSize)
 	n, err := o.Reader.Read(buf)
 	if err == io.EOF {
 		// simple case: object is smaller than max block size.
 		// metablock and datablock is the same!
 		if o.metablock == nil {
-			o.metablock = &block.Block{
-				ID:   rand.Int(),
-				Blob: buf[:n],
-			}
+			o.metablock = makeDataBlock(buf[:n])
 			return o.metablock, io.EOF
 		}
 		panic("unimplemented")

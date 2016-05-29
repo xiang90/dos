@@ -32,21 +32,41 @@ func (r *Router) Distribute(o *object.Object) error {
 }
 
 func (r *Router) Get(id int) (*object.Object, error) {
+	// only handle the simplest case for now.
+	// object < max block size.
+	b, err := r.getBlock(id)
+	if err != nil {
+		return nil, err
+	}
+	o := object.NewObjectFromBlock(b)
+	return o, nil
+}
+
+func (r *Router) getBlock(id int) (*block.Block, error) {
 	// todo: support dynamic groups
 	// fixme: do not hard code group name.
 	gurls := r.Groups["1"]
 
 	var err error
 	for _, url := range gurls {
-		var resp *http.Response
-		// again, now we only handle small block case
+		var (
+			resp *http.Response
+			b    []byte
+		)
 		resp, err = http.Get(url + "/" + fmt.Sprintf("%d", id))
-		if err == nil {
-			return &object.Object{
-				Reader: resp.Body,
-			}, nil
+		if err != nil {
+			log.Printf("failed to get block %d from %s", id, url)
+			continue
 		}
-		log.Printf("failed to get block %d from %s", id, url)
+
+		b, err = ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			log.Printf("failed to read block %d from %s", id, url)
+			continue
+		}
+
+		return &block.Block{ID: id, Blob: b}, nil
 	}
 	return nil, err
 }
